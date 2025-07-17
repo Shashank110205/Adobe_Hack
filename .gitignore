@@ -1,0 +1,4 @@
+myenv/
+input/*.pdf
+output/*.json
+models/minilm.onnx
