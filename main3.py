@@ -18,6 +18,9 @@ from tokenizers import Tokenizer
 from unstructured.partition.pdf import partition_pdf
 from deep_translator import GoogleTranslator
 from langdetect import detect
+from collections import defaultdict
+
+from concurrent.futures import ThreadPoolExecutor
 
 print("🔄 Loading model and classifier...")
 session = ort.InferenceSession("models/all-MiniLM-L6-v2.onnx")
@@ -25,21 +28,20 @@ tokenizer = Tokenizer.from_file("models/tokenizer/tokenizer.json")
 clf = joblib.load("models/heading_classifier.pkl")
 le = joblib.load("models/label_encoder.pkl")
 
-# Blacklist text fragments
 BLACKLIST_PHRASES = {
     "version 2014",
     "international software testing qualifications board",
     "page"
 }
 
-# Logging
 removed_entries = []
 duplicate_entries = []
+translation_cache = {}
 
 def normalize(text):
     text = text.strip()
     text = re.sub(r"\s+", " ", text)
-    text = text.replace("–", "-").replace("©", "").strip()
+    text = text.replace("\u2013", "-").replace("\u00a9", "").strip()
     return text.lower()
 
 def is_redundant(text):
@@ -57,121 +59,111 @@ def is_sentence_like(text):
         return False
     return text[0].islower() or text.endswith(".")
 
-def clean_outline(data):
-    seen = set()
-    cleaned = []
-
-    for item in data.get("outline", []):
-        text = item.get("text", "").strip()
-        reason = is_redundant(text)
-        if reason:
-            removed_entries.append({"text": text, "reason": reason})
-            continue
-        if is_sentence_like(text):
-            removed_entries.append({"text": text, "reason": "sentence-like"})
-            continue
-        key = normalize(text)
-        if key in seen:
-            duplicate_entries.append(text)
-            continue
-        seen.add(key)
-        cleaned.append(item)
-
-    data["outline"] = cleaned
-    return data
-
 def translate_if_needed(text):
+    if text in translation_cache:
+        return translation_cache[text]
     try:
         lang = detect(text)
         if lang != "en":
             translated = GoogleTranslator(source='auto', target='en').translate(text)
+            translation_cache[text] = translated
             return translated
     except Exception as e:
         print(f"🌐 Translation failed for '{text}': {e}")
+    translation_cache[text] = text
     return text
 
-def embed(text):
-    translated = translate_if_needed(text)
-    output = tokenizer.encode(translated)
-    input_ids = np.array([output.ids], dtype="int64")
-    attention_mask = np.array([[1] * len(output.ids)], dtype="int64")
+def batch_embed(texts):
+    encoded = [tokenizer.encode(translate_if_needed(t)) for t in texts]
+    input_ids = np.array([e.ids for e in encoded], dtype="int64")
+    attention_mask = np.array([[1] * len(e.ids) for e in encoded], dtype="int64")
     outputs = session.run(None, {
         "input_ids": input_ids,
         "attention_mask": attention_mask
     })
     return outputs[0][:, 0, :]  # CLS token
 
-def get_heading_level(text):
-    text = text.strip()
-    match = re.match(r'^(\d+(.\d+){0,})\s+', text)
-    if match:
-        dot_count = text.split()[0].count(".") + 1
-        if dot_count == 1:
-            return "H1"
-        elif dot_count == 2:
-            return "H2"
-        else:
-            return "H3"
-    if len(text.split()) > 8 or text.endswith("."):
-        return "H2"
-    try:
-        pred = clf.predict(embed(text))
-        return le.inverse_transform(pred)[0]
-    except Exception as e:
-        print(f"⚠️ ONNX error for '{text}': {e}")
-        return "H2"
+def get_levels(texts):
+    levels = []
+    embeddings = batch_embed(texts)
+    for text, emb in zip(texts, embeddings):
+        text = text.strip()
+        match = re.match(r'^\d+(\.\d+)*\s+', text)
+        if match:
+            dot_count = text.split()[0].count(".") + 1
+            if dot_count == 1:
+                levels.append("H1")
+                continue
+            elif dot_count == 2:
+                levels.append("H2")
+                continue
+            else:
+                levels.append("H3")
+                continue
+        if len(text.split()) > 8 or text.endswith("."):
+            levels.append("H2")
+            continue
+        try:
+            pred = clf.predict([emb])
+            levels.append(le.inverse_transform(pred)[0])
+        except Exception as e:
+            print(f"⚠️ ONNX error for '{text}': {e}")
+            levels.append("H2")
+    return levels
 
 def extract_outline(pdf_path):
     print(f"📄 Processing: {pdf_path}")
     elements = partition_pdf(filename=pdf_path, infer_table_structure=False)
-    headings = []
     title = os.path.basename(pdf_path).replace(".pdf", "")
+
+    raw_texts = []
+    page_nums = []
 
     for el in elements:
         if type(el).__name__ in ["Title", "SectionHeader"]:
             text = el.text.strip()
             if len(text) < 3:
                 continue
-            page_num = getattr(el.metadata, "page_number", None) or 1
-            level = get_heading_level(text)
-            headings.append({
-                "level": level,
-                "text": text,
-                "page": page_num
-            })
+            reason = is_redundant(text)
+            if reason:
+                removed_entries.append({"text": text, "reason": reason})
+                continue
+            if is_sentence_like(text):
+                removed_entries.append({"text": text, "reason": "sentence-like"})
+                continue
+            key = normalize(text)
+            if key in translation_cache:
+                duplicate_entries.append(text)
+                continue
+            translation_cache[key] = None
+            raw_texts.append(text)
+            page_nums.append(getattr(el.metadata, "page_number", 1))
 
-    return {
-        "title": title,
-        "outline": headings
-    }
+    levels = get_levels(raw_texts)
+    outline = [{"level": lvl, "text": txt, "page": pg} for txt, pg, lvl in zip(raw_texts, page_nums, levels)]
+
+    return {"title": title, "outline": outline}
+
+def process_file(file_name):
+    input_path = os.path.join("input", file_name)
+    output_path = os.path.join("output", file_name.replace(".pdf", ".json"))
+    outline_data = extract_outline(input_path)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(outline_data, f, indent=4, ensure_ascii=False)
+    print(f"✅ Saved cleaned: {output_path}")
 
 def main():
-    input_folder = "input"
-    output_folder = "output"
-    os.makedirs(output_folder, exist_ok=True)
+    os.makedirs("output", exist_ok=True)
+    pdf_files = [f for f in os.listdir("input") if f.endswith(".pdf")]
 
-    for file_name in os.listdir(input_folder):
-        if file_name.endswith(".pdf"):
-            input_path = os.path.join(input_folder, file_name)
-            output_data = extract_outline(input_path)
+    with ThreadPoolExecutor() as executor:
+        executor.map(process_file, pdf_files)
 
-            # 🔍 Clean & deduplicate
-            output_data = clean_outline(output_data)
-
-            output_path = os.path.join(output_folder, file_name.replace(".pdf", ".json"))
-            with open(output_path, "w", encoding="utf-8") as f:
-                json.dump(output_data, f, indent=4, ensure_ascii=False)
-
-            print(f"✅ Saved cleaned: {output_path}")
-
-    # Optional: Log removed & duplicate entries
     with open("logs/logs_removed.json", "w", encoding="utf-8") as f:
         json.dump(removed_entries, f, indent=2, ensure_ascii=False)
     with open("logs/logs_duplicates.json", "w", encoding="utf-8") as f:
         json.dump(duplicate_entries, f, indent=2, ensure_ascii=False)
-    print(f"🧹 Removed entries: {len(removed_entries)} | 🔁 Duplicates skipped: {len(duplicate_entries)}")
+    print(f"🧹 Removed: {len(removed_entries)} | 🔁 Duplicates skipped: {len(duplicate_entries)}")
 
 if __name__ == "__main__":
     main()
-
-

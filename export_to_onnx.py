@@ -1,3 +1,9 @@
+# This script exports a HuggingFace model to ONNX format.
+# It uses the transformers library to load the model and tokenizer,
+# and torch to export the model to ONNX.
+# The exported model can be used for inference in various environments that support ONNX.
+# It exports the "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2" model.
+
 from transformers import AutoTokenizer, AutoModel
 import torch
 import os

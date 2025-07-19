@@ -1,3 +1,8 @@
+# This script trains a classifier for PDF headings using an ONNX model and a tokenizer.
+# It uses the sentence-transformers library for embedding and sklearn for classification.
+# It saves the trained classifier and label encoder for later use in the heading extraction pipeline.
+# It uses a multilingual MiniLM model for heading classification.
+
 import json
 import os
 import joblib
