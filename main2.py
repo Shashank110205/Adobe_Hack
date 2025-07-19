@@ -1,3 +1,8 @@
+# This script extracts headings from PDF files and classifies them into H1, H2, H3 levels.
+# It uses the unstructured library for PDF parsing, PyPDF2 for metadata extraction, 
+# and a multilingual MiniLM model for heading classification.
+# this uses direct model for inference and tokenizer loading.
+
 import os
 import json
 import re

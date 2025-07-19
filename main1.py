@@ -1,3 +1,9 @@
+# this script extract pdf heading hardcoded simple but effective
+# it uses unstructured library to extract headings from pdf files
+# it uses PyPDF2 to extract metadata like title
+# it uses sentence-transformers to classify headings into H1, H2, H3 levels
+# it uses a simple regex to detect numbered headings 
+
 import os
 import json
 import re

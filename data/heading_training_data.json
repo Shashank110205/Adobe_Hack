@@ -1,0 +1,42 @@
+[
+    {"text": "1 Introduction", "label": "H1"},
+    {"text": "2 Literature Review", "label": "H1"},
+    {"text": "3 Methodology", "label": "H1"},
+    {"text": "4 Results and Discussion", "label": "H1"},
+    {"text": "5 Conclusion", "label": "H1"},
+
+    {"text": "1.1 Background of the Study", "label": "H2"},
+    {"text": "2.1 Prior Work on Neural Networks", "label": "H2"},
+    {"text": "3.2 Experimental Setup", "label": "H2"},
+    {"text": "4.3 Key Findings", "label": "H2"},
+    {"text": "5.2 Summary and Future Scope", "label": "H2"},
+
+    {"text": "1.1.1 History of AI Research", "label": "H3"},
+    {"text": "2.2.3 Limitations of Prior Studies", "label": "H3"},
+    {"text": "3.1.2 Tools Used for Implementation", "label": "H3"},
+    {"text": "4.4.5 Precision vs Recall Trade-off", "label": "H3"},
+    {"text": "5.3.2 Future Challenges in AI Ethics", "label": "H3"},
+
+    {"text": "Abstract", "label": "H1"},
+    {"text": "Acknowledgments", "label": "H1"},
+    {"text": "Appendix A: Supplementary Material", "label": "H1"},
+    {"text": "References", "label": "H1"},
+
+    {"text": "Experimental Dataset Description", "label": "H2"},
+    {"text": "Implementation Details and Configuration", "label": "H2"},
+    {"text": "Performance Metrics Explanation", "label": "H2"},
+
+    {"text": "→ Analysis of Parameter Tuning Results", "label": "H3"},
+    {"text": "● Detailed Evaluation Report of Model V1", "label": "H3"},
+    {"text": "— Observations from Graphical Outputs", "label": "H3"},
+
+    {"text": "Summary", "label": "H1"},
+    {"text": "Future Work", "label": "H2"},
+    {"text": "Contribution of the Authors", "label": "H3"},
+
+    {"text": "Table 2.1: Accuracy Comparison across Models", "label": "H2"},
+    {"text": "Figure 3.2.1: Loss Curve Over Epochs", "label": "H3"},
+
+    {"text": "Case Study: Smart City Energy Efficiency", "label": "H2"},
+    {"text": "Real-World Example - Traffic Management Using AI", "label": "H3"}
+]
