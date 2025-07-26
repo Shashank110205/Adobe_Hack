@@ -18,7 +18,6 @@ from tokenizers import Tokenizer
 from unstructured.partition.pdf import partition_pdf
 from deep_translator import GoogleTranslator
 from langdetect import detect
-from collections import defaultdict
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -81,7 +80,10 @@ def batch_embed(texts):
         "input_ids": input_ids,
         "attention_mask": attention_mask
     })
-    return outputs[0][:, 0, :]  # CLS token
+    
+    # Convert ONNX output to numpy array first, then slice
+    output_array = np.array(outputs[0])
+    return output_array[:, 0, :]  # CLS token
 
 def get_levels(texts):
     levels = []

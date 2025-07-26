@@ -135,4 +135,4 @@ You’ve built a multilingual, ONNX-accelerated, production-ready PDF heading ex
 * 🧠 Smart
 * 🧹 Clean and reliable
 
-> Ready to be deployed or extended into real-world products.
+Ready to be deployed or extended into real-world products.
