@@ -47,7 +47,7 @@ def get_heading_level(text: str) -> str:
             "input_ids": input_ids,
             "attention_mask": attention_mask
         })
-        embedding = outputs[0][:, 0, :]
+        embedding = np.array(outputs)[:, 0, :]
         pred = clf.predict(embedding)
         return le.inverse_transform(pred)[0]
     except Exception as e:
