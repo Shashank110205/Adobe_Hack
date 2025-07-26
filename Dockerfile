@@ -32,8 +32,16 @@ RUN uv sync --frozen
 # Copy application code
 COPY . .
 
+# Set NLTK_DATA to include your download directory first
+ENV NLTK_DATA=/app/nltk_data:/app/.venv/nltk_data:/root/nltk_data
+
+RUN uv add nltk
+
 # Create necessary directories
 RUN mkdir -p logs output
+
+# Pre-download NLTK data to avoid runtime download issues
+RUN uv run python -c "import nltk; nltk.download('averaged_perceptron_tagger_eng', download_dir='/app/nltk_data'); nltk.download('punkt_tab', download_dir='/app/nltk_data')" || echo "NLTK download failed, will retry at runtime"
 
 # Expose port
 EXPOSE 8000

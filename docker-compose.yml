@@ -38,3 +38,4 @@ services:
 networks:
   default:
     name: pdf-extractor-network
+    driver: bridge
