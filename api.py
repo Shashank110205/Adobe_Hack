@@ -5,8 +5,7 @@ import re
 import onnxruntime as ort
 from tokenizers import Tokenizer
 from unstructured.partition.pdf import partition_pdf
-from deep_translator import GoogleTranslator
-from langdetect import detect
+# from langdetect import detect
 import tempfile
 from typing import List
 
@@ -82,19 +81,19 @@ def is_sentence_like(text):
         return False
     return text[0].islower() or text.endswith(".")
 
-def translate_if_needed(text):
-    if text in translation_cache:
-        return translation_cache[text]
-    try:
-        lang = detect(text)
-        if lang != "en":
-            translated = GoogleTranslator(source='auto', target='en').translate(text)
-            translation_cache[text] = translated
-            return translated
-    except Exception as e:
-        print(f"🌐 Translation failed for '{text}': {e}")
-    translation_cache[text] = text
-    return text
+# def translate_if_needed(text):
+#     if text in translation_cache:
+#         return translation_cache[text]
+#     try:
+#         lang = detect(text)
+#         if lang != "en":
+#             translated = GoogleTranslator(source='auto', target='en').translate(text)
+#             translation_cache[text] = translated
+#             return translated
+#     except Exception as e:
+#         print(f"🌐 Translation failed for '{text}': {e}")
+#     translation_cache[text] = text
+#     return text
 
 def batch_embed(texts):
     global tokenizer, session
@@ -105,7 +104,7 @@ def batch_embed(texts):
     if session is None:
         raise HTTPException(status_code=500, detail="ONNX session not loaded. Server may still be starting up.")
     
-    encoded = [tokenizer.encode(translate_if_needed(t)) for t in texts]
+    encoded = [tokenizer.encode(t) for t in texts]
     input_ids = np.array([e.ids for e in encoded], dtype="int64")
     attention_mask = np.array([[1] * len(e.ids) for e in encoded], dtype="int64")
     outputs = session.run(None, {
