@@ -1,4 +1,4 @@
-# 🧾 PDF Heading Extractor (Multilingual & Optimized)
+# 🧾 PDF Heading Extractor
 
 This project extracts structured outlines from PDF documents by detecting headings and classifying them into hierarchical levels (H1, H2, H3). The solution is designed to be efficient, multilingual-aware, and ready for scaling across diverse document types.
 
@@ -52,31 +52,22 @@ This tool:
 ## 🧠 How It Works
 
 1. **PDF Parsing**
-
-   * Uses `unstructured` to extract text elements from each PDF
+   Uses `unstructured` to extract text elements from each PDF.
 
 2. **Filtering**
-
-   * Filters out footers, very short lines, and irrelevant sections
+   Filters out footers, very short lines, and irrelevant sections.
 
 3. **Language Handling**
-
-   * Detects the language of each heading
-   * Translates non-English text into English using `deep-translator`
+   Detects the language of each heading and translates to English using `deep-translator`.
 
 4. **Embedding**
-
-   * Uses the ONNX version of `all-MiniLM-L6-v2` to embed headings
-   * Batch processes headings for performance
+   Uses ONNX version of `all-MiniLM-L6-v2` for fast vector embedding.
 
 5. **Prediction**
-
-   * Feeds embeddings to a trained `LogisticRegression` model
-   * Classifies each heading as H1, H2, or H3
+   Classifies headings into H1/H2/H3 via trained `LogisticRegression` model.
 
 6. **Output**
-
-   * Saves structured JSON with headings, page numbers, and levels
+   Produces structured JSON with heading text, page number, and level.
 
 ---
 
@@ -107,6 +98,52 @@ This tool:
 
 ---
 
+## ⚙️ Installation & Setup
+
+### 🔧 Prerequisites
+
+Make sure you have Docker and Docker Compose installed.
+
+### 🚀 Build & Run
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/your-username/pdf-heading-extractor
+   cd pdf-heading-extractor
+   ```
+
+2. **Build the Docker image:**
+
+   ```bash
+   docker compose build
+   ```
+
+3. **Start the service:**
+
+   ```bash
+   docker compose up
+   ```
+
+> 📴 Once the image is built, the application can be run completely **offline** — no internet is required to extract headings from PDFs.
+
+### 🔗 Accessing the App
+
+After the container is running, the API will be available at:
+
+```
+http://localhost:8000/
+```
+
+>[!TIP]
+> You can interact with the API using the Swagger UI. The UI is available at:
+>
+>```
+>http://localhost:8000/docs
+>```
+
+---
+
 ## 🧩 Future Enhancements
 
 * [ ] Include both original and translated headings in output JSON
@@ -118,11 +155,11 @@ This tool:
 
 ## 📌 Why This Project is Valuable
 
-This tool is ideal for anyone needing:
+This tool is ideal for:
 
 * Automatic table-of-contents extraction from academic or technical PDFs
-* Support for multilingual documents (e.g., Hindi, Arabic, Chinese)
-* Clean, structured outlines for indexing, summarization, or navigation
+* Supporting multilingual documents (e.g., Hindi, Arabic, Chinese)
+* Creating clean, structured outlines for indexing, summarization, or navigation
 
 ---
 
@@ -136,3 +173,8 @@ You’ve built a multilingual, ONNX-accelerated, production-ready PDF heading ex
 * 🧹 Clean and reliable
 
 Ready to be deployed or extended into real-world products.
+
+---
+
+Let me know if you'd like to include usage examples (e.g. `curl` or Python client) or a FastAPI-based UI section!
+
