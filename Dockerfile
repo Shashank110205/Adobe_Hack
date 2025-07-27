@@ -1,9 +1,10 @@
-FROM python:3.12-slim
+# Use Python 3.10 as specified in challenge requirements for AMD64 compatibility
+FROM --platform=linux/amd64 python:3.12-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies required for PDF processing
 RUN apt-get update && apt-get install -y \
   build-essential \
   libgl1-mesa-glx \
@@ -20,36 +21,33 @@ RUN apt-get update && apt-get install -y \
   curl \
   && rm -rf /var/lib/apt/lists/*
 
-# Install uv (Python package installer)
+# Install uv for fast package management
 RUN pip install uv
 
-# Copy project files
+# Copy project configuration files
 COPY pyproject.toml uv.lock ./
 
 # Install Python dependencies using uv
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 
-# Copy application code
+# Copy application code and models
 COPY . .
+
+RUN ls
+
+# Set environment variables for proper execution
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 # Set NLTK_DATA to include your download directory first
 ENV NLTK_DATA=/app/nltk_data:/app/.venv/nltk_data:/root/nltk_data
 
-RUN uv add nltk
-
 # Create necessary directories
-RUN mkdir -p logs output
+RUN mkdir -p logs output input
 
 # Pre-download NLTK data to avoid runtime download issues
 RUN uv run python -c "import nltk; nltk.download('averaged_perceptron_tagger_eng', download_dir='/app/nltk_data'); nltk.download('punkt_tab', download_dir='/app/nltk_data')" || echo "NLTK download failed, will retry at runtime"
 
-# Expose port
-EXPOSE 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
-
-# Run the application
-CMD ["uv", "run", "api.py"]
+# Run the PDF processing script directly (no API server)
+CMD ["uv", "run", "main.py"]
 

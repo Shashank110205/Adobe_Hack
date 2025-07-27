@@ -76,7 +76,6 @@ work_check.txt
 train_classifier*.py
 export_to_onnx*.py
 save_tokenizer.py
-main*.py
 
 # Large input files (optional - comment out if you want them in the image)
 input/*.pdf
