@@ -109,38 +109,28 @@ Make sure you have Docker and Docker Compose installed.
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/pdf-heading-extractor
-   cd pdf-heading-extractor
+    git clone git@github.com:Shashank110205/Adobe_Hack.git
+    cd Adobe_Hack
    ```
 
 2. **Build the Docker image:**
 
    ```bash
-   docker compose build
+    docker compose build
+    # or build the image manually using
+    docker build -t pdf-processor .
    ```
 
-3. **Start the service:**
+3. **Run the Docker container:**
 
    ```bash
-   docker compose up
+    docker run -it --rm \
+      --name pdf-processor \
+      --volume "<path_to_the_folder_with_the_input_pdfs>:/app/input:ro" \
+      --volume "<path_to_the_output_directory>:/app/output" \
+      --volume "<path_to_the_logs_directory_if_needed>:/app/logs" \ # this line is optional
+      pdf-processor
    ```
-
-> 📴 Once the image is built, the application can be run completely **offline** — no internet is required to extract headings from PDFs.
-
-### 🔗 Accessing the App
-
-After the container is running, the API will be available at:
-
-```
-http://localhost:8000/
-```
-
->[!TIP]
-> You can interact with the API using the Swagger UI. The UI is available at:
->
->```
->http://localhost:8000/docs
->```
 
 ---
 
@@ -160,21 +150,3 @@ This tool is ideal for:
 * Automatic table-of-contents extraction from academic or technical PDFs
 * Supporting multilingual documents (e.g., Hindi, Arabic, Chinese)
 * Creating clean, structured outlines for indexing, summarization, or navigation
-
----
-
-## 🙌 Summary
-
-You’ve built a multilingual, ONNX-accelerated, production-ready PDF heading extractor that’s:
-
-* ⚡ Fast
-* 🌍 Language-aware
-* 🧠 Smart
-* 🧹 Clean and reliable
-
-Ready to be deployed or extended into real-world products.
-
----
-
-Let me know if you'd like to include usage examples (e.g. `curl` or Python client) or a FastAPI-based UI section!
-
