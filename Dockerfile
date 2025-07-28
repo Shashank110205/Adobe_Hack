@@ -1,5 +1,5 @@
 # Use Python 3.10 as specified in challenge requirements for AMD64 compatibility
-FROM --platform=linux/amd64 python:3.12-slim
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
