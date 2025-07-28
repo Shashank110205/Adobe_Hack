@@ -5,6 +5,7 @@ This project extracts structured outlines from PDF documents by detecting headin
 ---
 ## Team
 Name : InnovationNation 
+
 Members : 
 - [Shashank Tiwari](https://github.com/Shashank110205)
 - [Badal Singh](https://github.com/Badalsingh2)
