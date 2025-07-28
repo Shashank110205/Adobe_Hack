@@ -3,6 +3,14 @@
 This project extracts structured outlines from PDF documents by detecting headings and classifying them into hierarchical levels (H1, H2, H3). The solution is designed to be efficient, multilingual-aware, and ready for scaling across diverse document types.
 
 ---
+## Team
+Name : InnovationNation 
+Members : 
+- [Shashank Tiwari](https://github.com/Shashank110205)
+- [Badal Singh](https://github.com/Badalsingh2)
+- [Vivian Ludrick](https://github.com/vivalchemy)
+
+---
 
 ## 🔍 What This Project Does
 
@@ -20,6 +28,7 @@ This tool:
 ## Model Used:
 **all-MiniLM-L6-v2** *(87MiB)*
 
+---
 
 ## ✅ Key Features
 
