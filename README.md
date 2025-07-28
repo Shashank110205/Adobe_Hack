@@ -17,6 +17,10 @@ This tool:
 
 ---
 
+## Model Used:
+**all-MiniLM-L6-v2** *(87MiB)*
+
+
 ## ✅ Key Features
 
 | Feature                    | Description                                                                   |
